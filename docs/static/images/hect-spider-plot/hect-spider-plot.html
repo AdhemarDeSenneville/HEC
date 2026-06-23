@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HEC-T Spider Plot Prototype</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f7fb;
+      color: #182033;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 32px;
+    }
+
+    .chart-card {
+      width: min(100%, 980px);
+      padding: 30px;
+      border: 1px solid #e0e5ef;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 18px 55px rgba(31, 43, 72, 0.1);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.45rem, 3vw, 2.15rem);
+      letter-spacing: -0.035em;
+      text-align: center;
+    }
+
+    .subtitle {
+      margin: 8px 0 18px;
+      color: #667085;
+      text-align: center;
+    }
+
+    #radar-chart {
+      display: block;
+      width: 100%;
+      height: auto;
+      overflow: visible;
+    }
+
+    .grid-ring,
+    .axis-line {
+      fill: none;
+      stroke: #d9deea;
+    }
+
+    .grid-ring {
+      stroke-width: 1.2;
+    }
+
+    .axis-line {
+      stroke-width: 1;
+    }
+
+    .scale-label {
+      fill: #98a2b3;
+      font-size: 12px;
+    }
+
+    .dataset-label {
+      fill: #344054;
+      font-size: 13px;
+      font-weight: 650;
+      letter-spacing: 0.01em;
+    }
+
+    .series-area {
+      stroke-width: 3;
+      stroke-linejoin: round;
+      transition: opacity 180ms ease;
+    }
+
+    [data-series="dfn"] .series-area {
+      stroke-dasharray: 10 8;
+      stroke-width: 2.5;
+    }
+
+    [data-series="baseline"] .series-area {
+      stroke-width: 2.5;
+    }
+
+    [data-series="hect"] .series-area {
+      stroke-width: 5;
+      filter: drop-shadow(0 2px 3px rgba(116, 66, 200, 0.28));
+    }
+
+    .series-point {
+      stroke-width: 2;
+      transition: r 120ms ease;
+    }
+
+    [data-series="hect"] .series-point {
+      stroke-width: 3;
+    }
+
+    .series-point:hover {
+      r: 6;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .legend button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid #e0e5ef;
+      border-radius: 999px;
+      background: #fff;
+      color: #344054;
+      font: inherit;
+      font-size: 0.88rem;
+      font-weight: 650;
+      cursor: pointer;
+    }
+
+    .legend button[aria-pressed="false"] {
+      opacity: 0.42;
+    }
+
+    .swatch {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: var(--series-color);
+    }
+
+    .tooltip {
+      position: fixed;
+      z-index: 5;
+      pointer-events: none;
+      padding: 8px 10px;
+      border-radius: 9px;
+      background: #172033;
+      color: white;
+      box-shadow: 0 8px 24px rgba(23, 32, 51, 0.2);
+      font-size: 0.82rem;
+      line-height: 1.35;
+      opacity: 0;
+      transform: translate(-50%, calc(-100% - 12px));
+      transition: opacity 100ms ease;
+    }
+
+    .tooltip.visible {
+      opacity: 1;
+    }
+
+    body.embed {
+      min-height: 0;
+      padding: 0;
+      background: #ffffff;
+      overflow: hidden;
+    }
+
+    html:has(body.embed) {
+      background: #ffffff;
+    }
+
+    body.embed .chart-card {
+      width: 100%;
+      padding: 8px 10px 4px;
+      border: 0;
+      border-radius: 0;
+      background: #ffffff;
+      box-shadow: none;
+    }
+
+    body.embed #radar-chart {
+      width: 80%;
+      margin: -4px auto -12px;
+    }
+
+    body.embed h1 {
+      margin-bottom: 0;
+    }
+
+    body.embed .legend {
+      margin-top: 0;
+    }
+
+    @media (max-width: 680px) {
+      body {
+        padding: 12px;
+      }
+
+      .chart-card {
+        padding: 20px 10px;
+      }
+
+      .dataset-label {
+        font-size: 11px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="chart-card">
+    <h1>Zero-Shot Accuracy</h1>
+
+    <svg id="radar-chart" viewBox="0 0 900 690" role="img"
+      aria-label="Spider plot comparing CLIP DFN, LVLM Qwen2-VL, and LVLM plus HEC-T across twelve datasets">
+    </svg>
+
+    <div id="legend" class="legend" aria-label="Toggle plot series"></div>
+  </main>
+
+  <div id="tooltip" class="tooltip" role="status"></div>
+
+  <script>
+    if (new URLSearchParams(window.location.search).has("embed")) {
+      document.body.classList.add("embed");
+    }
+
+    // Values transcribed from the HEC-T zero-shot table (Qwen2-VL block).
+    const datasets = [
+      "Oxford Pets", "EuroSAT", "UCF101", "SUN397",
+      "Caltech-101", "DTD", "Aircraft", "Food-101",
+      "Flowers-102", "Stanford Cars", "CUB Birds", "Traffic Signs"
+    ];
+
+    const series = [
+      {
+        id: "dfn",
+        label: "CLIP (DFN)",
+        color: "#9aa0aa",
+        values: [97.6, 53.0, 87.8, 97.4, 99.3, 78.4, 70.7, 96.7, 93.8, 99.6, 96.5, 45.3]
+      },
+      {
+        id: "baseline",
+        label: "LVLM (Qwen2-VL = DFN + LLM)",
+        color: "#171717",
+        values: [84.1, 33.6, 85.6, 94.2, 98.4, 70.9, 62.1, 91.2, 78.3, 91.1, 69.7, 54.5]
+      },
+      {
+        id: "hect",
+        label: "LVLM + HEC-T",
+        color: "#7442c8",
+        values: [95.2, 54.0, 92.6, 97.0, 99.3, 84.2, 78.7, 95.2, 91.1, 97.7, 85.9, 63.8]
+      }
+    ];
+
+    const svg = document.querySelector("#radar-chart");
+    const legend = document.querySelector("#legend");
+    const tooltip = document.querySelector("#tooltip");
+    const NS = "http://www.w3.org/2000/svg";
+
+    const center = { x: 450, y: 335 };
+    const radius = 245;
+    const labelRadius = 293;
+    const ringValues = [20, 40, 60, 80, 100];
+    const angleStep = (Math.PI * 2) / datasets.length;
+
+    function svgElement(tag, attributes = {}) {
+      const element = document.createElementNS(NS, tag);
+      Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+      return element;
+    }
+
+    function position(index, value, distance = radius) {
+      const angle = index * angleStep - Math.PI / 2;
+      const scaledDistance = distance * (value / 100);
+      return {
+        x: center.x + Math.cos(angle) * scaledDistance,
+        y: center.y + Math.sin(angle) * scaledDistance,
+        angle
+      };
+    }
+
+    function polygonPoints(values, distance = radius) {
+      return values.map((value, index) => {
+        const point = position(index, value, distance);
+        return `${point.x},${point.y}`;
+      }).join(" ");
+    }
+
+    const gridGroup = svgElement("g", { "aria-hidden": "true" });
+    ringValues.forEach((ringValue) => {
+      gridGroup.appendChild(svgElement("polygon", {
+        points: polygonPoints(datasets.map(() => ringValue)),
+        class: "grid-ring"
+      }));
+
+      const scalePosition = position(0, ringValue);
+      const scaleLabel = svgElement("text", {
+        x: center.x + 7,
+        y: scalePosition.y - 5,
+        class: "scale-label"
+      });
+      scaleLabel.textContent = ringValue;
+      gridGroup.appendChild(scaleLabel);
+    });
+
+    datasets.forEach((dataset, index) => {
+      const edge = position(index, 100);
+      gridGroup.appendChild(svgElement("line", {
+        x1: center.x,
+        y1: center.y,
+        x2: edge.x,
+        y2: edge.y,
+        class: "axis-line"
+      }));
+
+      const labelPosition = position(index, 100, labelRadius);
+      const cosine = Math.cos(labelPosition.angle);
+      const label = svgElement("text", {
+        x: labelPosition.x,
+        y: labelPosition.y,
+        class: "dataset-label",
+        "text-anchor": cosine > 0.25 ? "start" : cosine < -0.25 ? "end" : "middle",
+        "dominant-baseline": "middle"
+      });
+      label.textContent = dataset;
+      gridGroup.appendChild(label);
+    });
+    svg.appendChild(gridGroup);
+
+    // Draw the strongest visual emphasis last so HEC-T stays easy to follow.
+    series.forEach((item) => {
+      const group = svgElement("g", {
+        "data-series": item.id,
+        "aria-label": item.label
+      });
+
+      group.appendChild(svgElement("polygon", {
+        points: polygonPoints(item.values),
+        fill: "none",
+        stroke: item.color,
+        class: "series-area"
+      }));
+
+      item.values.forEach((value, index) => {
+        const point = position(index, value);
+        const circle = svgElement("circle", {
+          cx: point.x,
+          cy: point.y,
+          r: item.id === "hect" ? 5 : 3.5,
+          fill: item.id === "hect" ? item.color : "#fff",
+          stroke: item.color,
+          class: "series-point",
+          tabindex: "0",
+          "aria-label": `${item.label}, ${datasets[index]}: ${value}%`
+        });
+
+        const showTooltip = (event) => {
+          tooltip.innerHTML = `<strong>${item.label}</strong><br>${datasets[index]}: ${value}%`;
+          tooltip.style.left = `${event.clientX}px`;
+          tooltip.style.top = `${event.clientY}px`;
+          tooltip.classList.add("visible");
+        };
+
+        circle.addEventListener("pointerenter", showTooltip);
+        circle.addEventListener("pointermove", showTooltip);
+        circle.addEventListener("pointerleave", () => tooltip.classList.remove("visible"));
+        circle.addEventListener("focus", () => {
+          const bounds = circle.getBoundingClientRect();
+          showTooltip({ clientX: bounds.left + bounds.width / 2, clientY: bounds.top });
+        });
+        circle.addEventListener("blur", () => tooltip.classList.remove("visible"));
+        group.appendChild(circle);
+      });
+
+      svg.appendChild(group);
+
+      const button = document.createElement("button");
+      button.type = "button";
+      button.setAttribute("aria-pressed", "true");
+      button.style.setProperty("--series-color", item.color);
+      button.innerHTML = `<span class="swatch"></span>${item.label}`;
+      button.addEventListener("click", () => {
+        const visible = button.getAttribute("aria-pressed") === "true";
+        button.setAttribute("aria-pressed", String(!visible));
+        group.style.opacity = visible ? "0" : "1";
+        group.style.pointerEvents = visible ? "none" : "auto";
+      });
+      legend.appendChild(button);
+    });
+  </script>
+</body>
+</html>

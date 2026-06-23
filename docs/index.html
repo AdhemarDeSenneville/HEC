@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="Unlocking Few-Shot Capabilities in LVLMs via Prompt Conditioning and Head Selection">
+  <meta name="keywords" content="LVLM, Few-Shot Learning, Zero-Shot Learning, ECCV 2026">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Unlocking Few-Shot Capabilities in LVLMs via Prompt Conditioning and Head Selection</title>
+  <link rel="icon" href="./static/images/favicon.svg" type="image/svg+xml">
+
+  <link href="static/css/bootstrap-4.4.1.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+
+  <style>
+    :root {
+      --page-max: 1120px;
+      --wide-max: 1700px;
+      --text: #1f2430;
+      --muted: #667085;
+      --soft-bg: #f5f7fc;
+      --soft-bg-2: #fbfcff;
+      --card: #ffffff;
+      --line: rgba(255,255,255,0.96);
+      --shadow: 0 12px 32px rgba(16, 24, 40, 0.08);
+      --shadow-strong: 0 18px 48px rgba(16, 24, 40, 0.12);
+      --radius: 20px;
+      --accent: #ff7a59;
+      --accent-2: #ff5fa2;
+      --accent-3: #7c6cff;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Google Sans', 'Noto Sans', sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(91, 124, 255, 0.05), transparent 24%),
+        radial-gradient(circle at top right, rgba(155, 107, 255, 0.05), transparent 28%),
+        #ffffff;
+    }
+
+    .section-spacious {
+      padding-top: 4rem;
+      padding-bottom: 4rem;
+    }
+
+    .page-container {
+      max-width: var(--page-max);
+    }
+
+    .wide-container {
+      max-width: var(--wide-max);
+      width: 96%;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(180deg, #fbfcff 0%, #f5f7fd 100%);
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(95, 210, 255, 0.10), transparent 18%),
+        radial-gradient(circle at 82% 14%, rgba(155, 107, 255, 0.10), transparent 20%),
+        linear-gradient(180deg, rgba(255,255,255,0.45), rgba(255,255,255,0));
+      pointer-events: none;
+    }
+
+    .hero .hero-body,
+    .section {
+      position: relative;
+      z-index: 1;
+    }
+
+    .publication-title {
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+      margin-bottom: 0.75rem;
+      font-size: clamp(2.5rem, 5.6vw, 4.9rem);
+      color: #162033;
+    }
+
+    .gradient-word {
+      display: inline-block;
+      padding-right: 0.03em;
+      background: linear-gradient(135deg, #ff7a59 0%, #ff5fa2 52%, #7c6cff 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .cvpr-line {
+      font-size: clamp(1.25rem, 2.3vw, 2rem);
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      color: #53627e;
+      margin-bottom: 1.15rem;
+    }
+
+    .title-underline {
+      text-decoration: underline;
+      text-decoration-thickness: 0.08em;
+      text-underline-offset: 0.12em;
+    }
+
+    .hero-subtitle {
+      color: var(--muted);
+      max-width: 900px;
+      margin: 0 auto;
+      line-height: 1.7;
+      font-size: 1.1rem;
+    }
+
+    .contact-line a {
+      color: inherit;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(31, 36, 48, 0.18);
+    }
+
+    .hero .link-block {
+      margin: 0.2rem 0.28rem;
+      display: inline-block;
+    }
+
+    .button.is-dark.is-rounded {
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .button.is-dark.is-rounded:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.14);
+    }
+
+    .teaser-shell {
+      max-width: 560px;
+      width: min(78vw, 560px);
+      margin: 0 auto;
+    }
+
+    .teaser-video {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      height: auto;
+      display: block;
+      object-fit: cover;
+      border-radius: 24px;
+      box-shadow: var(--shadow-strong);
+      background: #000;
+    }
+
+    .prompt-explorer {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: clamp(1rem, 3vw, 2rem);
+      background: #fff;
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 28px;
+      box-shadow: var(--shadow-strong);
+    }
+
+    .prompt-controls {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+      margin: 0.85rem 0 1.35rem;
+    }
+
+    .prompt-button {
+      border: 1px solid #dbe3f1;
+      border-radius: 999px;
+      padding: 0.72rem 1.1rem;
+      background: #f8fafc;
+      color: #475569;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .prompt-button:hover {
+      transform: translateY(-1px);
+    }
+
+    .prompt-button.is-active {
+      color: #fff;
+      background: linear-gradient(135deg, #3155b7, #7c3aed);
+      border-color: transparent;
+      box-shadow: 0 10px 24px rgba(79, 70, 229, 0.22);
+    }
+
+    .prompt-head {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      color: #334155;
+    }
+
+    .prompt-head-badge {
+      padding: 0.35rem 0.72rem;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #4338ca;
+      font-size: 0.86rem;
+      font-weight: 800;
+    }
+
+    .prompt-visuals {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .prompt-visual {
+      overflow: hidden;
+      border-radius: 18px;
+      background: #e2e8f0;
+    }
+
+    .prompt-visual img {
+      display: block;
+      width: 100%;
+      height: auto;
+      transition: opacity 0.25s ease;
+    }
+
+    .prompt-footer {
+      margin-top: 1rem;
+    }
+
+    .prompt-key-points {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      margin: 1.15rem 0 1.25rem;
+    }
+
+    .prompt-key-point {
+      min-width: min(100%, 520px);
+      padding: 0.68rem 1.05rem;
+      border: 1px solid #cfd8f7;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #f7f9ff 0%, #eef2ff 100%);
+      color: #27356f;
+      font-weight: 700;
+      box-shadow: 0 7px 18px rgba(49, 85, 183, 0.09);
+    }
+
+    .prompt-key-point strong {
+      display: inline-grid;
+      place-items: center;
+      width: 1.65rem;
+      height: 1.65rem;
+      margin-right: 0.4rem;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3155b7, #7c3aed);
+      color: #fff;
+      font-size: 0.88rem;
+    }
+
+    .prompt-explanation {
+      margin: 0 auto;
+      max-width: 650px;
+      color: #64748b;
+      line-height: 1.55;
+      text-align: center;
+    }
+
+    @media (max-width: 720px) {
+      .prompt-visuals {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .soft-section {
+      background: linear-gradient(180deg, var(--soft-bg-2) 0%, var(--soft-bg) 100%);
+    }
+
+    .feature-box {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.7rem 1.85rem;
+    }
+
+    .feature-box ul {
+      margin-bottom: 0;
+    }
+
+    .feature-box li {
+      margin-bottom: 0.8rem;
+      line-height: 1.75;
+      font-size: 1.06rem;
+    }
+
+    .pill {
+      display: inline-block;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      color: #3155b7;
+      background: #ebf1ff;
+      padding: 0.36rem 0.82rem;
+      border-radius: 999px;
+      margin-bottom: 1rem;
+    }
+
+    .section-intro {
+      max-width: 940px;
+      margin: 0 auto;
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: 1.08rem;
+    }
+
+    .figure-frame {
+      background: white;
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      padding: 0.9rem;
+    }
+
+    .main-figure {
+      width: 100%;
+      display: block;
+      border-radius: 14px;
+    }
+
+    .caption-text {
+      line-height: 1.8;
+      font-size: 1.05rem;
+      color: #2b3342;
+    }
+
+    .performance-shell {
+      max-width: 1100px;
+      width: min(96vw, 1100px);
+      margin: 0 auto;
+    }
+
+    .compare-scroll {
+      overflow-x: auto;
+      padding-bottom: 0.35rem;
+      margin-top: 2rem;
+    }
+
+    .compare-row {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(185px, 1fr));
+      gap: 0.95rem;
+      min-width: 1260px;
+    }
+
+    .compare-card {
+      background: white;
+      border-radius: 16px;
+      padding: 0.45rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .compare-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 34px rgba(16,24,40,0.12);
+    }
+
+    .image-compare {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      border-radius: 12px;
+      background: #eef2f8;
+      isolation: isolate;
+    }
+
+    .compare-bg,
+    .compare-fg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center center;
+      background: #eef2f8;
+      display: block;
+      user-select: none;
+      -webkit-user-drag: none;
+      pointer-events: none;
+    }
+
+    .compare-bg {
+      z-index: 1;
+    }
+
+    .compare-fg {
+      z-index: 2;
+      clip-path: inset(0 50% 0 0);
+      -webkit-clip-path: inset(0 50% 0 0);
+    }
+
+    .compare-divider {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 2px;
+      transform: translateX(-50%);
+      background: var(--line);
+      z-index: 3;
+      pointer-events: none;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.05);
+    }
+
+    .compare-divider::before {
+      content: "↔";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.98);
+      color: #1f2937;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.96rem;
+      box-shadow: 0 4px 14px rgba(16,24,40,0.16);
+    }
+
+    .compare-slider {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      margin: 0;
+      z-index: 4;
+      cursor: ew-resize;
+    }
+
+    .compare-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.45rem;
+      padding: 0 0.12rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .panel-box {
+      background: linear-gradient(180deg, #fafcff 0%, #f3f6fc 100%);
+      border-radius: 22px;
+      padding: 2rem;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.9);
+    }
+
+    .bias-grid-top {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.85rem;
+      margin-bottom: 1.6rem;
+    }
+
+    .bias-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 0.55rem;
+    }
+
+    .bias-card-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.45rem;
+      padding-left: 0.15rem;
+    }
+
+    .bias-card img {
+      width: 100%;
+      display: block;
+      border-radius: 10px;
+      background: #eef2f8;
+    }
+
+    .pca-block {
+      margin-top: 1.8rem;
+    }
+
+    .pca-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.85rem;
+      color: #2d3952;
+    }
+
+    .pca-scroll {
+      overflow-x: auto;
+      padding-bottom: 0.3rem;
+    }
+
+    .pca-grid {
+      display: grid;
+      grid-template-columns: repeat(9, minmax(95px, 1fr));
+      gap: 0.45rem;
+      min-width: 940px;
+    }
+
+    .pca-thumb {
+      background: white;
+      border-radius: 10px;
+      padding: 0.2rem;
+      box-shadow: 0 6px 18px rgba(16,24,40,0.07);
+    }
+
+    .pca-thumb img {
+      width: 100%;
+      display: block;
+      border-radius: 8px;
+      background: #eef2f8;
+    }
+
+    .bias-secondary-figure {
+      margin-top: 1.6rem;
+    }
+
+    pre code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.95rem;
+      line-height: 1.65;
+    }
+
+    /* Highlights section */
+    .highlights-shell {
+      background: linear-gradient(180deg, #ffffff 0%, #f8faff 100%);
+      border: 1px solid rgba(21, 32, 51, 0.05);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 1.2rem;
+    }
+
+    .highlights-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.95rem;
+    }
+
+    .highlight-card {
+      border: 1px solid rgba(21, 32, 51, 0.05);
+      border-radius: 20px;
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.05);
+      padding: 1.15rem 1.05rem;
+      text-align: left;
+    }
+
+    .highlight-card.card-blue {
+      background: linear-gradient(180deg, #ffffff 0%, #f4f8ff 100%);
+    }
+
+    .highlight-card.card-lilac {
+      background: linear-gradient(180deg, #ffffff 0%, #f8f4ff 100%);
+    }
+
+    .highlight-card.card-cyan {
+      background: linear-gradient(180deg, #ffffff 0%, #f3fcff 100%);
+    }
+
+    .highlight-card.card-rose {
+      background: linear-gradient(180deg, #ffffff 0%, #fff6fb 100%);
+    }
+
+    .highlight-topline {
+      font-size: 0.8rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #7282a0;
+      margin-bottom: 0.65rem;
+    }
+
+    .highlight-title {
+      font-size: 1.18rem;
+      line-height: 1.2;
+      color: #162033;
+      margin-bottom: 0.7rem;
+      font-weight: 800;
+    }
+
+    .highlight-text {
+      font-size: 1rem;
+      line-height: 1.68;
+      color: #5d6a7b;
+    }
+
+    .highlight-text strong {
+      color: #22314d;
+    }
+
+    /* Latency section */
+    .latency-shell {
+      margin-top: 1.8rem;
+      width: 100%;
+      background: linear-gradient(180deg, #ffffff 0%, #f8faff 100%);
+      border: 1px solid rgba(21, 32, 51, 0.05);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 1.35rem 1.3rem 1.2rem;
+      text-align: left;
+    }
+
+    .latency-header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .latency-title {
+      font-size: 1.2rem;
+      line-height: 1.2;
+      font-weight: 800;
+      color: #162033;
+      margin: 0;
+    }
+
+    .latency-subtitle {
+      font-size: 0.98rem;
+      color: #66758b;
+      line-height: 1.65;
+      margin: 0.35rem 0 0;
+    }
+
+    .latency-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: #eef3ff;
+      color: #33456a;
+      border-radius: 999px;
+      padding: 0.5rem 0.85rem;
+      font-size: 0.92rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .latency-grid {
+      display: grid;
+      gap: 0.8rem;
+    }
+
+    .latency-row {
+      display: grid;
+      grid-template-columns: minmax(220px, 1.15fr) minmax(150px, 0.9fr) minmax(0, 3fr) 90px;
+      gap: 0.9rem;
+      align-items: center;
+      background: #ffffff;
+      border: 1px solid rgba(21, 32, 51, 0.05);
+      border-radius: 18px;
+      padding: 0.9rem 1rem;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+    }
+
+    .latency-method {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #22314d;
+    }
+
+    .latency-backbone {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #627086;
+    }
+
+    .latency-bar-track {
+      position: relative;
+      height: 14px;
+      background: #eef2f8;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .latency-bar-fill {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: var(--w);
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(91,124,255,0.95), rgba(155,107,255,0.95));
+    }
+
+    .latency-bar-fill.alt {
+      background: linear-gradient(90deg, rgba(148,163,184,0.95), rgba(148,163,184,0.95));
+    }
+
+    .latency-bar-fill.alt2 {
+      background: linear-gradient(90deg, rgba(186,195,209,0.95), rgba(186,195,209,0.95));
+    }
+
+    .latency-value {
+      font-size: 0.98rem;
+      font-weight: 800;
+      color: #2b3953;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .latency-note {
+      margin-top: 0.9rem;
+      font-size: 0.95rem;
+      line-height: 1.7;
+      color: #66758b;
+    }
+
+    @media screen and (max-width: 1024px) {
+      .feature-box li,
+      .section-intro,
+      .caption-text {
+        font-size: 1rem;
+      }
+
+      .bias-grid-top {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .performance-shell {
+        width: min(92vw, 680px);
+      }
+
+      .highlights-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .latency-row {
+        grid-template-columns: 1.2fr 0.9fr 2fr 80px;
+      }
+    }
+
+    @media screen and (max-width: 768px) {
+      .section-spacious {
+        padding-top: 3rem;
+        padding-bottom: 3rem;
+      }
+
+      .hero-subtitle {
+        font-size: 1rem;
+      }
+
+      .teaser-shell {
+        width: min(86vw, 480px);
+      }
+
+      .compare-row {
+        min-width: 1140px;
+      }
+
+      .bias-grid-top {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.65rem;
+      }
+
+      .panel-box {
+        padding: 1.25rem;
+      }
+
+      .performance-shell {
+        width: min(94vw, 560px);
+      }
+
+      .highlight-text {
+        font-size: 1rem;
+      }
+
+      .highlights-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .latency-row {
+        grid-template-columns: 1fr;
+        gap: 0.55rem;
+      }
+
+      .latency-value {
+        text-align: left;
+      }
+    }
+
+    @media screen and (max-width: 520px) {
+      .bias-grid-top {
+        grid-template-columns: 1fr;
+      }
+
+      .performance-shell {
+        width: 100%;
+      }
+
+      .figure-frame {
+        padding: 0.55rem;
+        border-radius: 16px;
+      }
+    }
+
+    .performance-shell,
+    .figure-frame {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+
+    .main-figure {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      object-fit: contain;
+    }
+
+    .coming-soon {
+      position: relative;
+      cursor: default;
+      overflow: visible !important;
+    }
+
+    .coming-soon::after {
+      content: "Coming Soon";
+      visibility: hidden;
+      opacity: 0;
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 8px);
+      transform: translateX(-50%);
+      background-color: black;
+      color: white;
+      text-align: center;
+      padding: 5px 10px;
+      border-radius: 5px;
+      white-space: nowrap;
+      font-size: 12px;
+      line-height: 1.2;
+      z-index: 9999;
+      pointer-events: none;
+      transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+    }
+
+    .coming-soon:hover::after {
+      visibility: visible;
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <section class="hero">
+    <div class="hero-body">
+      <div class="container page-container">
+        <div class="columns is-centered">
+          <div class="column has-text-centered">
+
+            <h1 class="title publication-title">
+              🔒 Unlocking Few-Shot Capabilities 🔓<br>
+              in LVLMs via<br>
+              <u>Prompt Conditioning</u> and <u>Head Selection</u>
+            </h1>
+
+            <div class="cvpr-line">ECCV 2026</div>
+
+            <div class="is-size-5 publication-authors">
+              <span class="author-block">
+                <a href="https://adhemardesenneville.github.io/">Adhemar de Senneville</a><sup>1</sup>,
+              </span>
+              <span class="author-block">
+                <a href="https://xavibou.github.io/">Xavi Bou</a><sup>2</sup>,
+              </span>
+              <span class="author-block">
+                <a href="https://scholar.google.com/citations?user=GLovf4UAAAAJ&hl=en">Rafael Grompone</a><sup>1</sup>,
+              </span>
+              <span class="author-block">
+                <a href="https://scholar.google.com/citations?user=tM5-UCsAAAAJ&hl=en">Jérémy Anger</a><sup>1</sup>,
+              </span>
+              <span class="author-block">
+                <a href="http://gfacciol.github.io/">Gabriele Facciolo</a><sup>1,3</sup>
+              </span>
+            </div>
+
+            <div class="is-size-5 publication-authors" style="display: flex; justify-content: center; flex-wrap: wrap; column-gap: 2rem; row-gap: 0.6rem;">
+              <span class="author-block"><sup>1</sup>ENS Paris-Saclay, Centre Borelli</span>
+              <span class="author-block"><sup>2</sup>École Polytechnique, AMIAD</span>
+              <span class="author-block"><sup>3</sup>Institut Universitaire de France</span>
+            </div>
+
+            <div class="column has-text-centered">
+
+              <span class="link-block">
+                <a href="https://arxiv.org/abs/2603.24181" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="ai ai-arxiv"></i></span>
+                  <span>arXiv</span>
+                </a>
+              </span>
+
+              <span class="link-block">
+                <a href="https://github.com/AdhemarDeSenneville/HEC" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fab fa-github"></i></span>
+                  <span>Code</span>
+                </a>
+              </span>
+
+              <span class="link-block">
+                <a class="external-link button is-normal is-rounded is-dark coming-soon">
+                  <span class="icon"><i class="fas fa-file-pdf"></i></span>
+                  <span>Poster</span>
+                </a>
+              </span>
+            </div>
+
+            <!-- <p class="hero-subtitle">
+              INSID3 performs in-context segmentation directly from a <strong>single frozen DINOv3 backbone</strong>,
+              without fine-tuning, segmentation decoders, or auxiliary models.
+            </p>
+
+            <div class="hero-subtitle" style="margin-top: 0.8rem;">
+              Annotate one or a few examples of a reference category, and INSID3 segments that category in new images.
+            </div> -->
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="hero teaser">
+    <div class="hero-body" style="padding-inline: 4vh;">
+      <div class="container page-container has-text-centered">
+        <div class="prompt-explorer" id="prompt-explorer">
+          <h2 class="title is-3" style="margin-bottom: 0.35rem;">LVLMs are worse than CLIP at Few-shot and Zero-shot classification unless...</h2>
+          <div class="prompt-key-points">
+            <span class="prompt-key-point"><strong>1.</strong> You use features from the right attention heads.</span>
+            <span class="prompt-key-point"><strong>2.</strong> You use the right prompt.</span>
+          </div>
+
+          <p class="prompt-explanation">
+            Select a prompt to display the attention map of the head best suited to the task.
+          </p>
+
+          <div class="prompt-controls" role="group" aria-label="Select a prompt">
+            <button class="prompt-button is-active" type="button" data-prompt="bird" aria-pressed="true">
+              What type of bird is this?
+            </button>
+            <button class="prompt-button" type="button" data-prompt="plane" aria-pressed="false">
+              What type of plane is this?
+            </button>
+          </div>
+
+          <div class="prompt-head">
+            <span>Selected attention head</span>
+            <span class="prompt-head-badge" id="prompt-head-label">Layer 23 · Head 6</span>
+          </div>
+
+          <div class="prompt-visuals">
+            <div class="prompt-visual">
+              <img id="prompt-image-15" src="static/images/interpretability/layer23_head6_b15.png" alt="Bird-specialized attention on the first bird and aircraft example">
+            </div>
+            <div class="prompt-visual">
+              <img id="prompt-image-19" src="static/images/interpretability/layer23_head6_b19.png" alt="Bird-specialized attention on the second bird and aircraft example">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+<section class="section soft-section section-spacious">
+  <div class="container page-container">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <span class="pill">A Unified Framework</span>
+        <h2 class="title is-3"><span class="gradient-word">HEC</span>: Head Ensemble Classifiers</h2>
+
+        <div class="performance-shell">
+          <div class="figure-frame">
+            <img src="static/images/main.png" alt="HEC (Head Ensemble Classifiers)" class="main-figure">
+          </div>
+
+          <div class="content centered" style="margin-top: 1.5rem;">
+            <p class="caption-text">
+              <strong>CLIP-based vs HEC (Ours).</strong>
+              CLIP-based methods encode class names and support set images independently to construct a zero-shot and a few-shot classifier respectively.
+              Our method keeps the same two-classifier structure.
+              However, both distributions go through a shared LLM decoder which can be conditioned by a text prompt to include guidance on the domain or the classes of the support set.
+              The few-shot classifier (<strong>HEC-V</strong>) and zero-shot classifier (<strong>HEC-T</strong>) build on separate sparse sets of vision-heads and text-heads, respectively.
+              Similarly to CLIP-based methods, the two classifiers can be combined into a single classifier (<strong>HEC-VT</strong>).
+            </p>
+          </div>
+
+        </div>
+
+        <div class="highlights-shell" style="margin-top: 1.5rem;">
+          <div class="highlight-card card-cyan">
+            <div class="highlight-title">A Unified Training-free Framework</div>
+            <div class="highlight-text">
+              HEC covers <strong>few-shot</strong> and <strong>zero-shot</strong> classification in one framework, without fine-tuning.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+  <section class="section section-spacious">
+    <div class="container page-container">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <span class="pill">HEC-V</span>
+          <h2 class="title is-3">Selecting Vision-Heads with GDA</h2>
+
+          <div class="panel-box">
+            <div class="content">
+              <div class="figure-frame">
+                <img src="static/images/HEC-V.png" alt="HEC-V vision-head selection with Gaussian Discriminant Analysis" class="main-figure">
+              </div>
+              <p class="caption-text" style="margin-top: 1.2rem;">
+                Vision-heads are better than the model’s output at few-shot classification.
+                HEC-V evaluates the prompt-conditioned features of each attention head using
+                <strong>Gaussian Discriminant Analysis (GDA)</strong> on the support set.
+                It then selects a sparse set of the 20 most discriminative vision-heads and combines their predictions into the few-shot classifier.
+              </p>
+            </div>
+          </div>
+
+          <div class="highlights-shell" style="margin-top: 1.5rem;">
+            <div class="highlight-card card-blue">
+              <div class="highlight-title">Prompt-conditioned Domain Adaptation</div>
+              <div class="highlight-text">
+                HEC-V extracts prompt-conditioned domain-specific few-shot features from LVLMs, which was previously impossible with vision-only or CLIP backbones.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section soft-section section-spacious">
+    <div class="container page-container">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <span class="pill">HEC-T</span>
+          <h2 class="title is-3">Selecting Text-Heads Only Once</h2>
+
+          <div class="panel-box">
+            <div class="content">
+              <div class="figure-frame">
+                <iframe
+                  src="static/images/hect-spider-plot/hect-spider-plot.html?embed=1"
+                  title="Interactive zero-shot accuracy spider plot comparing CLIP (DFN), LVLM (Qwen2-VL = DFN + LLM), and LVLM + HEC-T across 12 datasets"
+                  style="display: block; width: 100%; height: clamp(520px, 58vw, 670px); margin: 0 auto; border: 0; background: #ffffff;"
+                  scrolling="no"
+                  loading="lazy">
+                </iframe>
+              </div>
+              <p class="caption-text" style="margin-top: 1.2rem;">
+                Text-heads are better than the model’s output at zero-shot classification.
+                HEC-T selects a sparse set of the 20 most discriminative text-heads and combines their predictions into the zero-shot classifier.
+                <!-- By selecting the top 20 text-heads only once on ImageNet, HEC-T improves the zero-shot performance of Qwen2-VL across 12 heterogeneous benchmarks. -->
+                <!-- HEC-T’s consistent gains across 12 heterogeneous benchmarks support that top text-heads transfer across domains. -->
+              </p>
+            </div>
+          </div>
+
+          <div class="highlights-shell" style="margin-top: 1.5rem;">
+            <div class="highlight-card card-lilac">
+              <div class="highlight-title">Text-Head Transferability</div>
+              <div class="highlight-text">
+                By selecting the top 20 text-heads only once on ImageNet, HEC-T improves the zero-shot performance of Qwen2-VL by 10.1 points.
+                <!-- HEC-T improves Qwen2-VL zero-shot classification by +10.1 points, using transferable text-head representations. -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-spacious">
+    <div class="container page-container">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <span class="pill">HEC-VT</span>
+          <h2 class="title is-3">Combining Vision and Text Heads</h2>
+
+          <div class="latency-shell">
+            <div class="latency-grid">
+              <div class="latency-row">
+                <div class="latency-method">GDA</div>
+                <div class="latency-backbone">Previous CLIP SOTA</div>
+                <div class="latency-bar-track">
+                  <div class="latency-bar-fill alt2" style="--w:81.5%;"></div>
+                </div>
+                <div class="latency-value">81.5%</div>
+              </div>
+
+              <div class="latency-row">
+                <div class="latency-method">SAVs</div>
+                <div class="latency-backbone">Previous LVLM SOTA</div>
+                <div class="latency-bar-track">
+                  <div class="latency-bar-fill alt" style="--w:80%;"></div>
+                </div>
+                <div class="latency-value">80.0%</div>
+              </div>
+
+              <div class="latency-row">
+                <div class="latency-method">HEC-VT</div>
+                <div class="latency-backbone">Ours</div>
+                <div class="latency-bar-track">
+                  <div class="latency-bar-fill" style="--w:83%;"></div>
+                </div>
+                <div class="latency-value">83.0%</div>
+              </div>
+            </div>
+
+            <p class="latency-note">
+              Higher is better. Average 4-shot accuracy across 12 datasets.
+            </p>
+          </div>
+
+          <div class="highlights-shell" style="margin-top: 1.5rem;">
+            <div class="highlight-card card-rose">
+              <div class="highlight-title">Bridging the Gap</div>
+              <div class="highlight-text">
+                HEC-VT combines HEC-V and HEC-T classifiers, bridging the gap between LVLM-based and CLIP-based few-shot classification.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-spacious" id="Contact">
+    <div class="container page-container">
+      <div class="columns is-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3 has-text-centered">Contact</h2>
+          <div class="figure-frame">
+            <p class="caption-text has-text-centered" style="margin: 0;">
+              For questions, contact
+              <a href="mailto:adhemar.de_senneville@ens-paris-saclay.fr"><strong>adhemar.de_senneville@ens-paris-saclay.fr</strong></a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section soft-section section-spacious" id="BibTeX">
+    <div class="container page-container">
+      <div class="columns is-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3 has-text-centered">BibTeX</h2>
+          <div class="figure-frame">
+            <!-- TODO Change -->
+<pre><code>@article{de2026unlocking,
+  title={Unlocking Few-Shot Capabilities in LVLMs via Prompt Conditioning and Head Selection},
+  author={de Senneville, Adhemar and Bou, Xavier and Anger, J{\'e}r{\'e}my and Grompone, Rafael and Facciolo, Gabriele},
+  journal={arXiv preprint arXiv:2603.24181},
+  year={2026}
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const compareBlocks = document.querySelectorAll('.image-compare');
+
+      compareBlocks.forEach(function (block) {
+        const slider = block.querySelector('.compare-slider');
+        const fg = block.querySelector('.compare-fg');
+        const divider = block.querySelector('.compare-divider');
+
+        function updateReveal(value) {
+          const rightInset = 100 - value;
+          const clipValue = 'inset(0 ' + rightInset + '% 0 0)';
+          fg.style.clipPath = clipValue;
+          fg.style.webkitClipPath = clipValue;
+          divider.style.left = value + '%';
+        }
+
+        updateReveal(parseFloat(slider.value));
+
+        slider.addEventListener('input', function (e) {
+          updateReveal(parseFloat(e.target.value));
+        });
+      });
+
+      const promptExplorer = document.getElementById('prompt-explorer');
+
+      if (promptExplorer) {
+        const promptButtons = promptExplorer.querySelectorAll('.prompt-button');
+        const image15 = document.getElementById('prompt-image-15');
+        const image19 = document.getElementById('prompt-image-19');
+        const headLabel = document.getElementById('prompt-head-label');
+
+        const promptStates = {
+          bird: {
+            head: 'Layer 23 · Head 6',
+            image15: 'static/images/interpretability/layer23_head6_b15.png',
+            image19: 'static/images/interpretability/layer23_head6_b19.png',
+            alt15: 'Bird-specialized attention on the first bird and aircraft example',
+            alt19: 'Bird-specialized attention on the second bird and aircraft example'
+          },
+          plane: {
+            head: 'Layer 26 · Head 24',
+            image15: 'static/images/interpretability/layer26_head24_b15.png',
+            image19: 'static/images/interpretability/layer26_head24_b19.png',
+            alt15: 'Aircraft-specialized attention on the first bird and aircraft example',
+            alt19: 'Aircraft-specialized attention on the second bird and aircraft example'
+          }
+        };
+
+        function selectPrompt(prompt) {
+          const state = promptStates[prompt];
+          image15.src = state.image15;
+          image19.src = state.image19;
+          image15.alt = state.alt15;
+          image19.alt = state.alt19;
+          headLabel.textContent = state.head;
+
+          promptButtons.forEach(function (button) {
+            const isActive = button.dataset.prompt === prompt;
+            button.classList.toggle('is-active', isActive);
+            button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+          });
+        }
+
+        promptButtons.forEach(function (button) {
+          button.addEventListener('click', function () {
+            selectPrompt(button.dataset.prompt);
+          });
+        });
+
+      }
+    });
+  </script>
+
+  <section class="section" style="padding-top: 1.5rem; padding-bottom: 2rem;">
+    <div class="container page-container">
+      <div class="content" style="font-size: 0.78rem; line-height: 1.55; color: #667085;">
+        <p style="margin: 0;">
+          <strong>Acknowledgements.</strong>
+          This work was partially funded by AID-DGA (l’Agence de l’Innovation de Défense à la Direction Générale de l’Armement, Ministère des Armées), and was also partly funded by the ANR-DFG project BOFOR ANR-24-CE92-0048.
+          This work was granted access to the HPC resources of IDRIS under the allocation 2025-AD011016525 made by GENCI.
+          <!--
+          We thank Xavier Bou, Jérémy Anger, Rafael Grompone, and Gabriele Facciolo for their contributions to the writing and review process, as well as to the development of the research ideas.
+           We also thank Xavier Bou for the original idea behind Figure 4 and for his contributions to the rebuttal.
+          -->
+           We thank Pierrick Bournez for his insightful feedback while reviewing the paper.
+           Finally, we thank Constantin Godard for his support during the NPC internship.
+           This website's template was inspired by the <a href="https://visinf.github.io/INSID3/" target="_blank" rel="noopener noreferrer">INSID3 project page</a>.
+         </p>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>
