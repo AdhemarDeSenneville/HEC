@@ -1,3 +1,4 @@
+path_base_MD: ${PATH_data}/Meta-Dataset-Records
 path_base: ${PATH_data}/Meta-Dataset-Records
 path_config: ${PATH_work}/config/metadataset/data_config_combined.gin
 

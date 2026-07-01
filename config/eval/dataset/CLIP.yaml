@@ -1,4 +1,4 @@
-path_base: ${PATH_data}/clip_datasets
+path_base_CD: ${PATH_data}/clip_datasets
 n_tuning_task: 0
 n_task: 60
 image_size: 224

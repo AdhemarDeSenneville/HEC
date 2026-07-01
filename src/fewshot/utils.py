@@ -8,7 +8,7 @@ import numpy as np
 from itertools import product
 from omegaconf import OmegaConf
 
-# None head and transform
+# None head and transform (We use no head and no augmentations)
 class Head(nn.Module):
     """
     Base class for all heads.
@@ -237,7 +237,7 @@ def instantiate_grid_search(cfg):
     return out
 
 
-# Utils TensorFlow
+# Utils TensorFlow (Suppress Warnings)
 def tg_tf():
     os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
     os.environ["GLOG_minloglevel"] = "3"

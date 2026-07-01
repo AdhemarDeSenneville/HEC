@@ -4,6 +4,7 @@
 <h3> ECCV 2026 </h3>
 <a href="https://arxiv.org/abs/2603.24181"><img src="https://img.shields.io/badge/arXiv-2603.24181-b31b1b" alt="arXiv"></a>
 <a href="https://adhemardesenneville.github.io/HEC/"><img src="https://img.shields.io/badge/Project_Page-green" alt="Project Page"></a>
+<a href="https://colab.research.google.com/drive/1PnBwmtsWYIDvX8bnH8PTqv-LKSh0I2B4?usp=sharing"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a>
 
 **[ENS Paris-Saclay, Centre Borelli](https://centreborelli.ens-paris-saclay.fr/fr)**; **[École Polytechnique, AMIAD](https://www.defense.gouv.fr/amiad-agence-ia-defense)**; **[Institut Universitaire de France](https://www.iufrance.fr/)**
 
@@ -15,11 +16,14 @@
 
 ## 📖 Overview
 
-**Head Ensemble Classifiers (HEC)** is a training-free unified framework for few-shot and zero-shot image classification. 
+**Head Ensemble Classifiers (HEC)** is a training-free unified framework for few-shot and zero-shot image classification. HEC bridges the gap between CLIP-based and LVLM-based methods while enabling prompt-conditioned feature extraction.
 
-- `HEC-V`: few-shot classifier with selected vision-heads.
-- `HEC-T`: zero-shot classifier with selected text-heads.
-- `HEC-VT`: vision-text few-shot classifier by combining `HEC-V` and `HEC-T`.
+- `HEC-V`: Classify few-shot using the best vision-heads.
+- `HEC-T`: Classify zero-shot using the best text-heads.
+- `HEC-VT`: Classify even better by combining `HEC-V` and `HEC-T`.
+
+> ✨ **New:** Try HEC from scratch in a minimal runnable Colab notebook:
+> [Open in Colab](https://colab.research.google.com/drive/1PnBwmtsWYIDvX8bnH8PTqv-LKSh0I2B4?usp=sharing)
 
 ## ⚙️ Installation
 
@@ -95,7 +99,7 @@ python -m eval \
   dataset.n_task=5 \
   server=jz \ # path configuration (create your own from example)
   task_name=table_vision_few_shot \ # output task folder
-  sub_task_name=HEC_V \ # output exp folder
+  sub_task_name=HEC_V \ # output experiment folder
   -m
 ```
 
@@ -108,7 +112,7 @@ When only class names are available.
 
 ```bash
 python -m eval \
- backbone=QWENv2,LLaVA_OV  \  # Eval both models
+ backbone=QWENv2,LLaVA_OV  \  # Evaluate both models
  backbone.output_llm_lasttok_heads=True \
  classifier=HEC_T \ 
  +classifier.context=Task \ # Use same heads on all datasets (Task text-heads)
@@ -136,7 +140,7 @@ python -m eval \
   classifier=HEC_VT \
   prompt=TD \ # Prompt with Domain conditioning 
   dataset=FULL_4S \ # 4-shot
-  dataset.n_tuning_task=1 \ # Per dataset Tuning
+  dataset.n_tuning_task=1 \ # Per-dataset tuning
   dataset.n_task=5 \
   server=jz \
   task_name=table_vision_text_few_shot \
