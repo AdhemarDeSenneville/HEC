@@ -1,0 +1,9 @@
+defaults:
+  - FULL
+  - _self_
+
+
+n_task: 5
+n_support: 4
+n_ways: 200 # max 200 which clamps SUN dataset
+n_query: 5

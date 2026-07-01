@@ -1,0 +1,8 @@
+defaults:
+  - META
+  - _self_
+
+
+n_support: 4
+n_ways: 200 # max 200 
+n_query: 5

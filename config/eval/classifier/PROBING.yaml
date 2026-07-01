@@ -1,0 +1,17 @@
+_target_: src.fewshot.classifier.ClassifierBaselineSimple
+
+input_mode: cls
+fit_mode: linear_ridge
+weight_decay: 1
+
+fit_hyperparams:
+  fit_intercept: false
+
+# Beeing able to sweep the weight decay is known to be powerful in few-shot learning:
+sweep_cfg:
+  weight_decay:
+    - 0.001
+    - 0.01
+    - 0.1
+    - 1
+    - 10.0

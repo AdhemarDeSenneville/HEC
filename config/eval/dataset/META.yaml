@@ -1,0 +1,12 @@
+path_base: ${PATH_data}/Meta-Dataset-Records
+path_config: ${PATH_work}/config/metadataset/data_config_combined.gin
+
+shuffle_buffer_size: 300
+image_size: 224
+
+n_tuning_task: 0
+n_task: 60
+
+datasets:
+  - cu_birds
+  - traffic_sign

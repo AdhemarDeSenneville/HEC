@@ -1,0 +1,7 @@
+_target_: src.fewshot.backbone.QwenV2Wrapper
+
+model_name: QWENv2
+weights: ${PATH_weights}/qwenv2
+
+num_features_out: 1280 
+output_llm_lasttok_heads: false

@@ -1,0 +1,30 @@
+defaults:
+  - _self_
+  - dataset: FULL_4S
+
+  - backbone: QWENv2
+  - classifier: HEC_VT
+  - prompt: TD
+
+  - server: mango
+  - hydra: default
+
+
+task_name: eval
+sub_task_name: exp_temp
+
+seed: 123
+device: cuda
+
+
+peft_c: 
+  batch_size_max_infer: 30 # depending on your GPU memory, you can increase this number to speed up inference
+  batch_size_max_train: 30 
+  mode_head: none
+  mode_backbone: none
+log_losses: false
+head:
+  _target_: src.fewshot.utils.NoneHead
+  input_mode: cls
+augment_c: 
+  _target_: src.fewshot.utils.build_none_transform

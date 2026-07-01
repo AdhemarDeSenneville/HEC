@@ -1,0 +1,3 @@
+_target_: src.fewshot.classifier.ClassifierVLMBaseline
+
+input_mode: cls

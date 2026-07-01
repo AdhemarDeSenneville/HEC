@@ -1,0 +1,6 @@
+_target_: src.fewshot.backbone.ClipWrapper
+
+model_name: SigLIPv1
+weights: ${PATH_weights}/siglip1_base
+num_features_out: 768
+num_features_hidden: 768

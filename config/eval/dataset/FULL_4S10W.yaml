@@ -1,0 +1,9 @@
+defaults:
+  - FULL
+  - _self_
+
+
+n_task: 5
+n_support: 4
+n_ways: 10
+n_query: 5

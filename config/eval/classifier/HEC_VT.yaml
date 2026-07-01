@@ -1,0 +1,26 @@
+_target_: src.fewshot.classifier.ClassifierHEC_VT
+
+input_mode: cls
+
+k_v: 20 # Same Head Budget as SAVs
+tau_v: 10 # Set to 10 for all experiments
+
+k_t: 20 # Same Head Budget as SAVs or HEC-V
+tau_t: 1 # = 1 equvalent to a simple Softmax classifier
+
+alpha: 1.0
+ensemble_method: mean_prob
+encoding: direct # direct, lettre
+
+sweep_cfg:
+  # Alpha sweep
+  # Higher alpha means the model has not seen the task before, and thus the model should rely more on the visual information
+  # Lower alpha means the model has seen the task before, and thus the model should rely more on the textual information
+  alpha:
+    - 0.1
+    - 10.0
+  # Head Budget Sweep
+  # We found that smaller head budget resulted in better performance on some datasets, and larger head budget resulted in better performance on other datasets.
+  k_v:
+    - 12
+    - 20

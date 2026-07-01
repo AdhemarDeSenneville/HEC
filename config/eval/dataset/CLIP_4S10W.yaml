@@ -1,0 +1,8 @@
+defaults:
+  - CLIP
+  - _self_
+
+
+n_support: 4
+n_ways: 10
+n_query: 5

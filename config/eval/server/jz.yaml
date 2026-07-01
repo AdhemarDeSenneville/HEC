@@ -1,0 +1,5 @@
+# @package _global_
+PATH_data: ${oc.env:WORK}/DATASETS_OSINT
+PATH_work: ${oc.env:WORK}/code/HEC
+PATH_logs: ${oc.env:WORK}/logs/_fewshot_jz
+PATH_weights: ${oc.env:WORK}/weights/FewShotSat/weights

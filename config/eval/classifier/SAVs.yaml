@@ -1,0 +1,18 @@
+_target_: src.fewshot.classifier.ClassifierSAV
+
+input_mode: cls
+k: 20
+rank_score:
+  type: NCC_accuracy
+pred_method: 
+  type: NCC
+ensemble_method: majority_vote
+
+# If you want to sweep heads
+# sweep_cfg:
+#   k:
+#     - 3
+#     - 5
+#     - 8
+#     - 12
+#     - 20

@@ -1,0 +1,29 @@
+path_base: None
+path_base_CD: ${PATH_data}/clip_datasets
+path_base_MD: ${PATH_data}/Meta-Dataset-Records
+
+path_config: ${PATH_work}/config/metadataset/data_config_combined.gin
+shuffle_buffer_size: 300
+
+n_tuning_task: 0
+n_task: 60
+image_size: 224
+
+
+datasets:
+# CLIP datasets
+  - eurosat # smallest
+  - sun397  # largest
+  - oxford_pets
+  - ucf101
+  - caltech101
+  - dtd
+  - fgvc
+  - food101
+  - oxford_flowers
+  - stanford_cars
+#  - imagenet
+
+# META datasets
+  - cu_birds
+  - traffic_sign

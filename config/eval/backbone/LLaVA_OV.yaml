@@ -1,0 +1,7 @@
+_target_: src.fewshot.backbone.LLaVAWrapper
+
+model_name: LLaVA_OV
+weights: ${PATH_weights}/llava_ov
+
+num_features_out: 1280
+output_llm_lasttok_heads: false

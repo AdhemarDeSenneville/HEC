@@ -1,0 +1,5 @@
+# @package _global_
+PATH_data: /media/adhemar/Disc4T11/DATASETS_OSINT
+PATH_work: /home/adhemar/Bureau/HEC
+PATH_logs: /home/adhemar/Bureau/FewShotSat/logs/_fewshot
+PATH_weights: /media/adhemar/Disc4T11/WEIGHTS/weights

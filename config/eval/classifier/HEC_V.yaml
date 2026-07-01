@@ -1,0 +1,17 @@
+_target_: src.fewshot.classifier.ClassifierHEC_V
+
+input_mode: cls
+
+k: 20
+tau: 10
+cov_reg: 1
+ensemble_method: mean_prob
+
+# If you want to sweep heads
+# sweep_cfg:
+#   k:
+#     - 3
+#     - 5
+#     - 8
+#     - 12
+#     - 20

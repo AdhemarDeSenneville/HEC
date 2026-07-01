@@ -1,0 +1,6 @@
+_target_: src.fewshot.backbone.ClipWrapper
+
+model_name: DFN
+weights: ${PATH_weights}/dfn
+num_features_out: 512
+num_features_hidden: 768
