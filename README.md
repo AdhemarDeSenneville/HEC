@@ -6,7 +6,7 @@
 <a href="https://adhemardesenneville.github.io/HEC/"><img src="https://img.shields.io/badge/Project_Page-green" alt="Project Page"></a>
 <a href="https://colab.research.google.com/drive/1PnBwmtsWYIDvX8bnH8PTqv-LKSh0I2B4?usp=sharing"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a>
 
-**[ENS Paris-Saclay, Centre Borelli](https://centreborelli.ens-paris-saclay.fr/fr)**; **[École Polytechnique, AMIAD](https://www.defense.gouv.fr/amiad-agence-ia-defense)**; **[Institut Universitaire de France](https://www.iufrance.fr/)**
+**[ENS Paris-Saclay, Centre Borelli](https://centreborelli.ens-paris-saclay.fr/fr)**; **[AMIAD, Pole Recherche](https://www.defense.gouv.fr/amiad-agence-ia-defense)**; **[Institut Universitaire de France](https://www.iufrance.fr/)**
 
 [Adhemar de Senneville](https://adhemardesenneville.github.io/), [Xavier Bou](https://xavibou.github.io/), [Jérémy Anger](https://scholar.google.com/citations?user=tM5-UCsAAAAJ&hl=en), [Rafael Grompone](https://scholar.google.com/citations?user=GLovf4UAAAAJ&hl=en), [Gabriele Facciolo](http://gfacciol.github.io/)
 
